@@ -12,6 +12,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from ui import load_custom_css, render_header, render_sidebar_section
 from utils.vector_search import VectorSearchManager, VectorSearchConfig, DocumentIngestion
+from config import get_platform_config
 
 # Page configuration
 st.set_page_config(
@@ -44,17 +45,29 @@ with tab1:
     st.markdown("Upload documents to build your agent's knowledge base with RAG capabilities")
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Platform selection
-    col1, col2 = st.columns([1, 2])
-    with col1:
-        platform = st.selectbox(
-            "Platform",
-            options=["Local", "Snowflake", "Databricks"],
-            help="Select where to store and index documents"
-        )
+    # Get global platform configuration
+    platform_config = get_platform_config()
+    platform = platform_config.get_platform_name()
+
+    # Show current platform
+    st.markdown(f"""
+    <div style="background: var(--sf-primary-light); border: 1px solid var(--sf-primary);
+                border-radius: 8px; padding: 12px; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 32px;">{platform_config.get_platform_icon()}</span>
+            <div>
+                <div style="font-weight: 600; font-size: 14px;">Deployment Platform: {platform}</div>
+                <div style="font-size: 12px; color: var(--sf-text-muted);">
+                    Storage: {platform_config.get_storage_label()} •
+                    Search: {platform_config.get_vector_search_label()}
+                </div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     # Platform-specific configuration
-    if platform == "Snowflake":
+    if platform_config.is_snowflake():
         st.markdown("#### ❄️ Snowflake Configuration")
 
         col1, col2 = st.columns(2)
@@ -78,12 +91,7 @@ with tab1:
             )
             embedding_model = st.selectbox(
                 "Cortex Embedding Model",
-                options=[
-                    "snowflake-arctic-embed-m",
-                    "snowflake-arctic-embed-l",
-                    "e5-base-v2",
-                    "multilingual-e5-large"
-                ],
+                options=platform_config.get_embedding_options(),
                 help="Snowflake Cortex embedding model"
             )
 
@@ -94,7 +102,7 @@ with tab1:
         3. Embeddings generated using Snowflake Cortex
         """)
 
-    elif platform == "Databricks":
+    elif platform_config.is_databricks():
         st.markdown("#### 🧱 Databricks Configuration")
 
         col1, col2 = st.columns(2)
@@ -118,11 +126,7 @@ with tab1:
             )
             embedding_model = st.selectbox(
                 "Embedding Model",
-                options=[
-                    "databricks-bge-large-en",
-                    "databricks-gte-large-en",
-                    "openai-text-embedding-ada-002"
-                ],
+                options=platform_config.get_embedding_options(),
                 help="Model for generating embeddings"
             )
 
@@ -134,7 +138,7 @@ with tab1:
         """)
 
     else:  # Local
-        st.markdown("#### 💻 Local Configuration")
+        st.markdown("#### 💻 Local Development Configuration")
 
         col1, col2 = st.columns(2)
         with col1:
@@ -147,11 +151,7 @@ with tab1:
         with col2:
             embedding_model = st.selectbox(
                 "Embedding Model",
-                options=[
-                    "text-embedding-ada-002",
-                    "text-embedding-3-small",
-                    "text-embedding-3-large"
-                ],
+                options=platform_config.get_embedding_options(),
                 help="OpenAI embedding model for local vector store"
             )
 
@@ -269,12 +269,12 @@ with tab1:
                                 # Create new index
                                 config_kwargs = {}
 
-                                if platform == "Snowflake":
+                                if platform_config.is_snowflake():
                                     config_kwargs = {
                                         "volume_path": f"{database}.{schema}.{stage_name}",
                                         "endpoint_name": f"{database}.{schema}.CORTEX_SEARCH_{new_index_name.upper()}"
                                     }
-                                elif platform == "Databricks":
+                                elif platform_config.is_databricks():
                                     config_kwargs = {
                                         "volume_path": volume_path,
                                         "endpoint_name": endpoint_name
@@ -286,7 +286,7 @@ with tab1:
 
                                 vector_config = st.session_state.vector_manager.create_index(
                                     name=new_index_name,
-                                    provider=platform.lower(),
+                                    provider=platform_config.platform.value,
                                     embedding_model=embedding_model,
                                     **config_kwargs
                                 )

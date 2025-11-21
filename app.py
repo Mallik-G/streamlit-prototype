@@ -16,6 +16,7 @@ from ui import (
 from chat import ChatEngine, Message
 from utils.data_connectors import get_connector
 from agent_builder import AgentBuilder, AgentExecutor
+from config import get_platform_config, set_platform, Platform
 
 # Page configuration
 st.set_page_config(
@@ -85,6 +86,53 @@ with st.sidebar:
         </div>
     </div>
     """, unsafe_allow_html=True)
+
+    # Platform Configuration Section
+    platform_config = get_platform_config()
+
+    render_sidebar_section("PLATFORM")
+
+    current_platform = st.selectbox(
+        "Deployment Platform",
+        options=["Local Development", "Snowflake", "Databricks"],
+        index=["local", "snowflake", "databricks"].index(platform_config.platform.value),
+        help="Select your deployment platform",
+        label_visibility="collapsed"
+    )
+
+    # Update platform if changed
+    platform_map = {
+        "Local Development": Platform.LOCAL,
+        "Snowflake": Platform.SNOWFLAKE,
+        "Databricks": Platform.DATABRICKS
+    }
+
+    if platform_map[current_platform] != platform_config.platform:
+        set_platform(platform_map[current_platform])
+        st.rerun()
+
+    # Show platform status
+    icon = platform_config.get_platform_icon()
+    name = platform_config.get_platform_name()
+
+    st.markdown(f"""
+    <div style="background: var(--sf-primary-light); border: 1px solid var(--sf-primary);
+                border-radius: 8px; padding: 12px; margin-top: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 24px;">{icon}</span>
+            <div>
+                <div style="font-weight: 600; font-size: 13px; color: var(--sf-primary-dark);">
+                    {name}
+                </div>
+                <div style="font-size: 11px; color: var(--sf-text-muted);">
+                    {platform_config.get_storage_label()} • {platform_config.get_vector_search_label()}
+                </div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
 
     # Agent Selector Section
     render_sidebar_section("ACTIVE AGENT")
@@ -208,10 +256,12 @@ Help users explore data, write optimized queries, and understand complex dataset
     # Database Connection
     render_sidebar_section("DATA CONNECTION")
 
+    db_options = platform_config.get_database_options()
     db_type = st.selectbox(
         "Database",
-        options=["Demo Mode", "Snowflake", "Databricks"],
-        index=0
+        options=db_options,
+        index=0,
+        help=f"Available for {platform_config.get_platform_name()}"
     )
 
     show_sql = st.toggle(
