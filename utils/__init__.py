@@ -6,11 +6,23 @@ from .data_connectors import (
     get_connector,
     QueryResult
 )
+from .vector_search import (
+    VectorSearchConfig,
+    VectorSearchManager,
+    DocumentIngestion,
+    RAGTool,
+    get_vector_search
+)
 
 __all__ = [
     "SnowflakeConnector",
     "DatabricksConnector",
     "MockConnector",
     "get_connector",
-    "QueryResult"
+    "QueryResult",
+    "VectorSearchConfig",
+    "VectorSearchManager",
+    "DocumentIngestion",
+    "RAGTool",
+    "get_vector_search"
 ]

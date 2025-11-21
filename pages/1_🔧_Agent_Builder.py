@@ -232,6 +232,44 @@ Your approach:
         else:
             memory_type = "none"
 
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # RAG / Knowledge Base
+        enable_rag = st.toggle(
+            "Enable RAG (Retrieval-Augmented Generation)",
+            value=False,
+            help="Use vector search to retrieve context from documents",
+            key="new_agent_rag"
+        )
+
+        vector_search_id = None
+        if enable_rag:
+            from utils.vector_search import VectorSearchManager
+
+            vector_manager = VectorSearchManager()
+            indexes = vector_manager.list_configs()
+
+            if indexes:
+                index_options = {f"🔍 {idx.name} ({idx.provider})": idx.id for idx in indexes}
+                selected_kb = st.selectbox(
+                    "Knowledge Base",
+                    options=list(index_options.keys()),
+                    key="new_agent_kb",
+                    help="Select vector search index for RAG"
+                )
+                vector_search_id = index_options[selected_kb]
+
+                # Automatically add RAG tool if not already selected
+                if 'rag_retrieval' not in selected_tools:
+                    selected_tools.append('rag_retrieval')
+
+                st.success("✅ RAG enabled with selected knowledge base")
+            else:
+                st.warning("⚠️ No knowledge bases found. Create one in the Knowledge Base page first.")
+                enable_rag = False
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
         is_public = st.toggle(
             "Make Public",
             value=False,
@@ -276,6 +314,8 @@ Your approach:
                     category=agent_category,
                     icon=agent_icon,
                     is_public=is_public,
+                    vector_search_id=vector_search_id,
+                    enable_rag=enable_rag,
                     creator=os.getenv("USER", "anonymous")
                 )
 

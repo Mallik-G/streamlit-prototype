@@ -41,6 +41,8 @@ class AgentConfig:
     version: str
     category: str
     icon: str = "🤖"
+    vector_search_id: Optional[str] = None  # ID of vector search configuration
+    enable_rag: bool = False  # Enable RAG for this agent
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
@@ -77,7 +79,9 @@ class AgentBuilder:
         creator: str = "anonymous",
         category: str = "general",
         is_public: bool = False,
-        icon: str = "🤖"
+        icon: str = "🤖",
+        vector_search_id: Optional[str] = None,
+        enable_rag: bool = False
     ) -> AgentConfig:
         """Create a new agent configuration"""
         agent_id = str(uuid.uuid4())
@@ -102,7 +106,9 @@ class AgentBuilder:
             is_public=is_public,
             version="1.0.0",
             category=category,
-            icon=icon
+            icon=icon,
+            vector_search_id=vector_search_id,
+            enable_rag=enable_rag
         )
 
         self.save_agent(agent)
@@ -303,6 +309,14 @@ def get_available_tools() -> List[Dict[str, Any]]:
             "description": "Make HTTP requests to external APIs",
             "icon": "🌐",
             "category": "integration"
+        },
+        {
+            "id": "rag_retrieval",
+            "name": "RAG Retrieval",
+            "description": "Retrieve context from vector search for document Q&A",
+            "icon": "🔎",
+            "category": "rag",
+            "requires": "vector_search"
         }
     ]
 

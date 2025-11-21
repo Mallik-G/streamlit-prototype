@@ -9,11 +9,17 @@ langchain-core>=0.1.0
 langchain-openai>=0.0.5
 langchain-anthropic>=0.1.0
 
+# Vector search and embeddings
+chromadb>=0.4.0
+PyPDF2>=3.0.0
+python-docx>=0.8.11
+
 # Optional: Snowflake integration
 # snowflake-snowpark-python>=1.10.0
 
 # Optional: Databricks integration
 # databricks-sql-connector>=2.9.0
+# databricks-vectorsearch>=0.22
 
 # Development
 watchdog>=3.0.0
