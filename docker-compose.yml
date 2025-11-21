@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  # Main Streamlit application
+  app:
+    build:
+      context: .
+      target: development
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app
+      - ./agents:/app/agents
+      - ./workflows:/app/workflows
+      - ./vector_stores:/app/vector_stores
+      - ./logs:/app/logs
+    environment:
+      - DEBUG=true
+      - LOG_LEVEL=DEBUG
+      - DEPLOYMENT_PLATFORM=local
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ChromaDB for local vector search
+  chromadb:
+    image: chromadb/chroma:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+      - ANONYMIZED_TELEMETRY=FALSE
+    restart: unless-stopped
+
+  # Optional: PostgreSQL for persistent storage
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=cortex_ai
+      - POSTGRES_USER=cortex
+      - POSTGRES_PASSWORD=cortex_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    profiles:
+      - with-db
+
+  # Optional: Redis for caching
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    profiles:
+      - with-cache
+
+volumes:
+  chroma_data:
+  postgres_data:
+  redis_data:

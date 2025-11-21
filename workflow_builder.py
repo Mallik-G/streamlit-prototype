@@ -15,6 +15,27 @@ from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from abc import ABC, abstractmethod
 import uuid
+import logging
+
+# Import logging utilities
+try:
+    from utils.logging_config import (
+        get_logger,
+        get_performance_logger,
+        get_audit_logger,
+        get_debug_context,
+    )
+
+    logger = get_logger("workflow_builder")
+    perf_logger = get_performance_logger()
+    audit_logger = get_audit_logger()
+    debug = get_debug_context()
+except ImportError:
+    # Fallback if logging not available
+    logger = logging.getLogger("workflow_builder")
+    perf_logger = None
+    audit_logger = None
+    debug = None
 
 
 @dataclass
