@@ -1,13 +1,19 @@
 """
 Workflow Builder - Multi-Agent Workflow Orchestration
 Form-based configuration, YAML storage, Mermaid visualization
+
+Architecture:
+- Pluggable executor design: Swap orchestration engines (Default, CrewAI, LangGraph)
+- Workflow definition (YAML) is engine-agnostic
+- Register custom executors via WorkflowExecutorRegistry
 """
 import os
 import yaml
 import json
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Type
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
+from abc import ABC, abstractmethod
 import uuid
 
 
@@ -251,17 +257,53 @@ class WorkflowBuilder:
             return None
 
 
-class WorkflowExecutor:
-    """Execute workflows"""
+class WorkflowExecutorBase(ABC):
+    """
+    Abstract base class for workflow executors.
+    Implement this to create custom orchestration engines (CrewAI, LangGraph, etc.)
+    """
 
     def __init__(self, workflow: WorkflowConfig):
         self.workflow = workflow
         self.context = {}  # Shared context for variables
         self.step_results = {}
 
+    @abstractmethod
+    def execute(self) -> Dict[str, Any]:
+        """
+        Execute workflow and return results.
+
+        Returns:
+            Dict with keys:
+            - success: bool
+            - results: Dict[step_id, step_result]
+            - context: Dict[variable_name, value]
+        """
+        pass
+
+    def _build_prompt(self, step: WorkflowStep) -> str:
+        """Build prompt for step using context"""
+        prompt_parts = [step.task_description]
+
+        # Add input variables from context
+        if step.input_variables:
+            prompt_parts.append("\n\nContext:")
+            for var in step.input_variables:
+                if var in self.context:
+                    prompt_parts.append(f"\n{var}: {self.context[var]}")
+
+        return "\n".join(prompt_parts)
+
+
+class DefaultWorkflowExecutor(WorkflowExecutorBase):
+    """
+    Default workflow executor - simple, transparent execution.
+    Supports sequential, parallel, and DAG modes.
+    """
+
     def execute(self) -> Dict[str, Any]:
         """Execute workflow and return results"""
-        from agent_builder import AgentBuilder, AgentExecutor
+        from agent_builder import AgentBuilder
 
         builder = AgentBuilder()
 
@@ -317,27 +359,58 @@ class WorkflowExecutor:
 
     def _execute_parallel(self, builder) -> Dict[str, Any]:
         """Execute steps in parallel (simplified - actually sequential for now)"""
-        # In production, use threading or async
+        # TODO: Implement true parallelism with threading or async
         return self._execute_sequential(builder)
 
     def _execute_dag(self, builder) -> Dict[str, Any]:
         """Execute steps based on dependency graph"""
-        # Topological sort and execute
-        # For now, use sequential
+        # TODO: Implement topological sort and parallel execution
         return self._execute_sequential(builder)
 
-    def _build_prompt(self, step: WorkflowStep) -> str:
-        """Build prompt for step using context"""
-        prompt_parts = [step.task_description]
 
-        # Add input variables from context
-        if step.input_variables:
-            prompt_parts.append("\n\nContext:")
-            for var in step.input_variables:
-                if var in self.context:
-                    prompt_parts.append(f"\n{var}: {self.context[var]}")
+class WorkflowExecutorRegistry:
+    """
+    Registry for workflow executors.
+    Allows plugging in different orchestration engines.
 
-        return "\n".join(prompt_parts)
+    Usage:
+        # Register custom executor
+        WorkflowExecutorRegistry.register("crewai", CrewAIExecutor)
+
+        # Use custom executor
+        executor = WorkflowExecutorRegistry.get_executor("crewai", workflow)
+        result = executor.execute()
+    """
+    _executors: Dict[str, Type[WorkflowExecutorBase]] = {
+        "default": DefaultWorkflowExecutor
+    }
+
+    @classmethod
+    def register(cls, name: str, executor_class: Type[WorkflowExecutorBase]):
+        """Register a new executor"""
+        if not issubclass(executor_class, WorkflowExecutorBase):
+            raise ValueError(f"{executor_class} must inherit from WorkflowExecutorBase")
+        cls._executors[name] = executor_class
+
+    @classmethod
+    def get_executor(
+        cls,
+        name: str,
+        workflow: WorkflowConfig
+    ) -> WorkflowExecutorBase:
+        """Get executor instance by name"""
+        if name not in cls._executors:
+            raise ValueError(f"Executor '{name}' not registered. Available: {list(cls._executors.keys())}")
+        return cls._executors[name](workflow)
+
+    @classmethod
+    def list_executors(cls) -> List[str]:
+        """List all registered executors"""
+        return list(cls._executors.keys())
+
+
+# Backward compatibility alias
+WorkflowExecutor = DefaultWorkflowExecutor
 
 
 def get_workflow_templates() -> List[Dict[str, Any]]:

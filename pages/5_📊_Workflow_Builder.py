@@ -15,6 +15,7 @@ from config import get_platform_config
 from workflow_builder import (
     WorkflowBuilder,
     WorkflowExecutor,
+    WorkflowExecutorRegistry,
     WorkflowStep,
     WorkflowConfig,
     get_workflow_templates
@@ -306,14 +307,34 @@ with tab2:
         st.markdown("---")
         st.markdown("#### Execute Workflow")
 
-        initial_context = st.text_area(
-            "Initial Context (JSON format)",
-            placeholder='{"user_query": "Analyze Q4 sales data"}',
-            help="Provide initial variables for the workflow"
-        )
+        col1, col2 = st.columns([2, 1])
+
+        with col1:
+            initial_context = st.text_area(
+                "Initial Context (JSON format)",
+                placeholder='{"user_query": "Analyze Q4 sales data"}',
+                help="Provide initial variables for the workflow"
+            )
+
+        with col2:
+            # Executor selection
+            available_executors = WorkflowExecutorRegistry.list_executors()
+            executor_type = st.selectbox(
+                "Execution Engine",
+                options=available_executors,
+                index=0,
+                help="Choose the orchestration engine. 'default' is simple and transparent. Add custom executors for advanced features."
+            )
+
+            # Show executor info
+            executor_info = {
+                "default": "Simple, transparent execution. Best for most use cases."
+            }
+            if executor_type in executor_info:
+                st.caption(executor_info[executor_type])
 
         if st.button("▶️ Execute Workflow", type="primary"):
-            with st.spinner("Executing workflow..."):
+            with st.spinner(f"Executing workflow with {executor_type} engine..."):
                 try:
                     # Parse initial context
                     import json
@@ -321,8 +342,8 @@ with tab2:
                         context = json.loads(initial_context)
                         temp_workflow.context = context
 
-                    # Create executor
-                    executor = WorkflowExecutor(temp_workflow)
+                    # Create executor using registry
+                    executor = WorkflowExecutorRegistry.get_executor(executor_type, temp_workflow)
 
                     # Execute
                     result = executor.execute()
@@ -602,6 +623,22 @@ with st.sidebar:
     - **Content Creation**: Research → Draft → Review → Publish
     - **Customer Support**: Classify → Route → Respond → Follow-up
     """)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("### 🔌 Execution Engines")
+    st.markdown("""
+    **Pluggable Architecture**
+    - Default: Simple, transparent
+    - CrewAI: Agent collaboration
+    - LangGraph: State machine
+    - Custom: Build your own
+
+    See `workflow_executors_example.py` for details.
+    """)
+
+    # Show available executors
+    available = WorkflowExecutorRegistry.list_executors()
+    st.markdown(f"**Active:** {', '.join(available)}")
 
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("### 📚 Resources")
