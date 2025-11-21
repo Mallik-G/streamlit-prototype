@@ -1,0 +1,19 @@
+# Core dependencies
+streamlit>=1.28.0
+pandas>=2.0.0
+python-dotenv>=1.0.0
+
+# LangChain dependencies
+langchain>=0.1.0
+langchain-core>=0.1.0
+langchain-openai>=0.0.5
+langchain-anthropic>=0.1.0
+
+# Optional: Snowflake integration
+# snowflake-snowpark-python>=1.10.0
+
+# Optional: Databricks integration
+# databricks-sql-connector>=2.9.0
+
+# Development
+watchdog>=3.0.0

@@ -1,0 +1,843 @@
+/* ========================================
+   Snowflake-Style Enterprise UI Theme
+   ======================================== */
+
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Sans+Pro:wght@300;400;600;700&display=swap');
+
+/* CSS Variables - Snowflake Color Palette */
+:root {
+    --sf-primary: #29B5E8;
+    --sf-primary-dark: #1A9FD4;
+    --sf-primary-light: #E8F7FC;
+    --sf-secondary: #249EBF;
+    --sf-accent: #11567F;
+    --sf-background: #F7F9FC;
+    --sf-surface: #FFFFFF;
+    --sf-surface-elevated: #FFFFFF;
+    --sf-text-primary: #1E2D3D;
+    --sf-text-secondary: #5A6978;
+    --sf-text-muted: #8B99A8;
+    --sf-border: #E3E8EF;
+    --sf-border-light: #F0F3F7;
+    --sf-success: #00A67E;
+    --sf-warning: #F5A623;
+    --sf-error: #E5484D;
+    --sf-code-bg: #1E2D3D;
+    --sf-shadow-sm: 0 1px 2px rgba(30, 45, 61, 0.04);
+    --sf-shadow-md: 0 4px 12px rgba(30, 45, 61, 0.08);
+    --sf-shadow-lg: 0 8px 24px rgba(30, 45, 61, 0.12);
+    --sf-radius-sm: 6px;
+    --sf-radius-md: 10px;
+    --sf-radius-lg: 16px;
+    --sf-font-family: 'Inter', 'Source Sans Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Dark Mode Variables */
+[data-theme="dark"] {
+    --sf-background: #0D1B2A;
+    --sf-surface: #1B2838;
+    --sf-surface-elevated: #243447;
+    --sf-text-primary: #F0F4F8;
+    --sf-text-secondary: #A8B9C9;
+    --sf-text-muted: #6B7D8F;
+    --sf-border: #2D4156;
+    --sf-border-light: #243447;
+    --sf-primary-light: #1A3A4A;
+}
+
+/* ========================================
+   Hide Streamlit Default Elements
+   ======================================== */
+#MainMenu {visibility: hidden !important;}
+footer {visibility: hidden !important;}
+header {visibility: hidden !important;}
+.stDeployButton {display: none !important;}
+div[data-testid="stToolbar"] {display: none !important;}
+div[data-testid="stDecoration"] {display: none !important;}
+div[data-testid="stStatusWidget"] {display: none !important;}
+#stStreamlitDialog {display: none !important;}
+
+/* Remove default Streamlit padding */
+.block-container {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    max-width: 100% !important;
+}
+
+.main .block-container {
+    padding: 0 !important;
+    max-width: 100% !important;
+}
+
+/* ========================================
+   Base Styles
+   ======================================== */
+html, body, [data-testid="stAppViewContainer"] {
+    font-family: var(--sf-font-family) !important;
+    background-color: var(--sf-background) !important;
+    color: var(--sf-text-primary) !important;
+}
+
+.stApp {
+    background-color: var(--sf-background) !important;
+}
+
+/* ========================================
+   Custom Header
+   ======================================== */
+.sf-header {
+    background: linear-gradient(135deg, var(--sf-accent) 0%, var(--sf-secondary) 100%);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--sf-shadow-md);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.sf-header-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sf-header-logo svg {
+    width: 32px;
+    height: 32px;
+}
+
+.sf-header-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #FFFFFF;
+    letter-spacing: -0.3px;
+}
+
+.sf-header-subtitle {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 400;
+}
+
+.sf-header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+/* ========================================
+   Sidebar Styling
+   ======================================== */
+[data-testid="stSidebar"] {
+    background-color: var(--sf-surface) !important;
+    border-right: 1px solid var(--sf-border) !important;
+}
+
+[data-testid="stSidebar"] > div:first-child {
+    background-color: var(--sf-surface) !important;
+    padding: 20px 16px !important;
+}
+
+.sf-sidebar-section {
+    background: var(--sf-surface);
+    border: 1px solid var(--sf-border);
+    border-radius: var(--sf-radius-md);
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.sf-sidebar-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--sf-text-muted);
+    margin-bottom: 12px;
+}
+
+/* ========================================
+   Chat Container
+   ======================================== */
+.sf-chat-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 140px);
+    background: var(--sf-background);
+    overflow: hidden;
+}
+
+.sf-messages-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    scroll-behavior: smooth;
+}
+
+.sf-messages-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sf-messages-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sf-messages-container::-webkit-scrollbar-thumb {
+    background: var(--sf-border);
+    border-radius: 3px;
+}
+
+.sf-messages-container::-webkit-scrollbar-thumb:hover {
+    background: var(--sf-text-muted);
+}
+
+/* ========================================
+   Message Bubbles
+   ======================================== */
+.sf-message {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    max-width: 85%;
+    animation: messageSlide 0.3s ease-out;
+}
+
+@keyframes messageSlide {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.sf-message-user {
+    flex-direction: row-reverse;
+    margin-left: auto;
+}
+
+.sf-message-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.sf-message-assistant .sf-message-avatar {
+    background: linear-gradient(135deg, var(--sf-primary) 0%, var(--sf-secondary) 100%);
+    color: white;
+}
+
+.sf-message-user .sf-message-avatar {
+    background: var(--sf-accent);
+    color: white;
+}
+
+.sf-message-content {
+    background: var(--sf-surface);
+    border: 1px solid var(--sf-border);
+    border-radius: var(--sf-radius-lg);
+    padding: 14px 18px;
+    box-shadow: var(--sf-shadow-sm);
+    max-width: 100%;
+}
+
+.sf-message-user .sf-message-content {
+    background: linear-gradient(135deg, var(--sf-primary) 0%, var(--sf-secondary) 100%);
+    border: none;
+    color: white;
+}
+
+.sf-message-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--sf-text-primary);
+}
+
+.sf-message-user .sf-message-text {
+    color: white;
+}
+
+.sf-message-timestamp {
+    font-size: 11px;
+    color: var(--sf-text-muted);
+    margin-top: 6px;
+}
+
+.sf-message-user .sf-message-timestamp {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* ========================================
+   Code Blocks
+   ======================================== */
+.sf-code-block {
+    background: var(--sf-code-bg);
+    border-radius: var(--sf-radius-sm);
+    margin: 12px 0;
+    overflow: hidden;
+}
+
+.sf-code-header {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sf-code-language {
+    font-size: 11px;
+    color: var(--sf-primary);
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.sf-code-copy {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.7);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sf-code-copy:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.sf-code-block pre {
+    margin: 0;
+    padding: 16px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #E8F0F8;
+}
+
+.sf-code-block code {
+    background: transparent !important;
+    padding: 0 !important;
+}
+
+/* ========================================
+   Input Bar
+   ======================================== */
+.sf-input-container {
+    background: var(--sf-surface);
+    border-top: 1px solid var(--sf-border);
+    padding: 16px 24px;
+    position: sticky;
+    bottom: 0;
+}
+
+.sf-input-wrapper {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.sf-input-field {
+    flex: 1;
+    background: var(--sf-background);
+    border: 2px solid var(--sf-border);
+    border-radius: var(--sf-radius-md);
+    padding: 14px 18px;
+    font-size: 14px;
+    font-family: var(--sf-font-family);
+    color: var(--sf-text-primary);
+    resize: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    min-height: 50px;
+    max-height: 150px;
+}
+
+.sf-input-field:focus {
+    outline: none;
+    border-color: var(--sf-primary);
+    box-shadow: 0 0 0 3px var(--sf-primary-light);
+}
+
+.sf-input-field::placeholder {
+    color: var(--sf-text-muted);
+}
+
+.sf-send-button {
+    background: linear-gradient(135deg, var(--sf-primary) 0%, var(--sf-secondary) 100%);
+    border: none;
+    border-radius: var(--sf-radius-md);
+    padding: 14px 20px;
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sf-send-button:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--sf-shadow-md);
+}
+
+.sf-send-button:active {
+    transform: translateY(0);
+}
+
+.sf-send-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ========================================
+   Buttons
+   ======================================== */
+.stButton > button {
+    background: linear-gradient(135deg, var(--sf-primary) 0%, var(--sf-secondary) 100%) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: var(--sf-radius-sm) !important;
+    padding: 10px 20px !important;
+    font-family: var(--sf-font-family) !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    transition: all 0.2s !important;
+    box-shadow: var(--sf-shadow-sm) !important;
+}
+
+.stButton > button:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: var(--sf-shadow-md) !important;
+}
+
+.sf-button-secondary {
+    background: transparent !important;
+    border: 2px solid var(--sf-border) !important;
+    color: var(--sf-text-primary) !important;
+}
+
+.sf-button-secondary:hover {
+    border-color: var(--sf-primary) !important;
+    color: var(--sf-primary) !important;
+}
+
+/* ========================================
+   Select Boxes & Inputs
+   ======================================== */
+.stSelectbox > div > div {
+    background-color: var(--sf-surface) !important;
+    border: 2px solid var(--sf-border) !important;
+    border-radius: var(--sf-radius-sm) !important;
+    font-family: var(--sf-font-family) !important;
+}
+
+.stSelectbox > div > div:focus-within {
+    border-color: var(--sf-primary) !important;
+    box-shadow: 0 0 0 3px var(--sf-primary-light) !important;
+}
+
+.stTextInput > div > div > input,
+.stTextArea > div > div > textarea {
+    background-color: var(--sf-surface) !important;
+    border: 2px solid var(--sf-border) !important;
+    border-radius: var(--sf-radius-sm) !important;
+    font-family: var(--sf-font-family) !important;
+    color: var(--sf-text-primary) !important;
+}
+
+.stTextInput > div > div > input:focus,
+.stTextArea > div > div > textarea:focus {
+    border-color: var(--sf-primary) !important;
+    box-shadow: 0 0 0 3px var(--sf-primary-light) !important;
+}
+
+/* ========================================
+   Toggle/Checkbox
+   ======================================== */
+.stCheckbox > label > div[data-testid="stCheckbox"] > div {
+    background-color: var(--sf-primary) !important;
+}
+
+/* ========================================
+   Cards
+   ======================================== */
+.sf-card {
+    background: var(--sf-surface);
+    border: 1px solid var(--sf-border);
+    border-radius: var(--sf-radius-md);
+    padding: 20px;
+    box-shadow: var(--sf-shadow-sm);
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.sf-card:hover {
+    box-shadow: var(--sf-shadow-md);
+}
+
+.sf-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--sf-text-primary);
+    margin-bottom: 8px;
+}
+
+.sf-card-description {
+    font-size: 14px;
+    color: var(--sf-text-secondary);
+    line-height: 1.5;
+}
+
+/* ========================================
+   SQL Explorer Panel
+   ======================================== */
+.sf-sql-panel {
+    background: var(--sf-surface);
+    border: 1px solid var(--sf-border);
+    border-radius: var(--sf-radius-md);
+    overflow: hidden;
+}
+
+.sf-sql-header {
+    background: var(--sf-background);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--sf-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.sf-sql-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--sf-text-primary);
+}
+
+.sf-sql-editor {
+    background: var(--sf-code-bg);
+    padding: 16px;
+    min-height: 120px;
+}
+
+.sf-sql-editor textarea {
+    background: transparent !important;
+    color: #E8F0F8 !important;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+    border: none !important;
+}
+
+/* ========================================
+   Data Table Styling
+   ======================================== */
+.sf-table-container {
+    background: var(--sf-surface);
+    border: 1px solid var(--sf-border);
+    border-radius: var(--sf-radius-md);
+    overflow: hidden;
+}
+
+[data-testid="stDataFrame"] {
+    border: none !important;
+}
+
+[data-testid="stDataFrame"] > div {
+    border-radius: var(--sf-radius-md) !important;
+}
+
+.stDataFrame thead tr th {
+    background: var(--sf-background) !important;
+    color: var(--sf-text-primary) !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    padding: 12px 16px !important;
+    border-bottom: 2px solid var(--sf-border) !important;
+}
+
+.stDataFrame tbody tr td {
+    padding: 12px 16px !important;
+    font-size: 14px !important;
+    color: var(--sf-text-primary) !important;
+    border-bottom: 1px solid var(--sf-border-light) !important;
+}
+
+.stDataFrame tbody tr:hover {
+    background: var(--sf-primary-light) !important;
+}
+
+/* ========================================
+   Expander
+   ======================================== */
+.streamlit-expanderHeader {
+    background: var(--sf-surface) !important;
+    border: 1px solid var(--sf-border) !important;
+    border-radius: var(--sf-radius-sm) !important;
+    font-family: var(--sf-font-family) !important;
+    font-weight: 600 !important;
+}
+
+/* ========================================
+   Spinner / Loading
+   ======================================== */
+.sf-loading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+}
+
+.sf-loading-dots {
+    display: flex;
+    gap: 4px;
+}
+
+.sf-loading-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--sf-primary);
+    border-radius: 50%;
+    animation: loadingPulse 1.4s infinite ease-in-out;
+}
+
+.sf-loading-dot:nth-child(1) { animation-delay: -0.32s; }
+.sf-loading-dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes loadingPulse {
+    0%, 80%, 100% {
+        transform: scale(0.6);
+        opacity: 0.5;
+    }
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ========================================
+   Welcome Screen
+   ======================================== */
+.sf-welcome {
+    text-align: center;
+    padding: 60px 40px;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.sf-welcome-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--sf-primary) 0%, var(--sf-secondary) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    box-shadow: var(--sf-shadow-lg);
+}
+
+.sf-welcome-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--sf-text-primary);
+    margin-bottom: 12px;
+}
+
+.sf-welcome-subtitle {
+    font-size: 16px;
+    color: var(--sf-text-secondary);
+    line-height: 1.6;
+    margin-bottom: 32px;
+}
+
+.sf-suggestions {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.sf-suggestion-card {
+    background: var(--sf-surface);
+    border: 1px solid var(--sf-border);
+    border-radius: var(--sf-radius-md);
+    padding: 16px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sf-suggestion-card:hover {
+    border-color: var(--sf-primary);
+    box-shadow: var(--sf-shadow-md);
+    transform: translateY(-2px);
+}
+
+.sf-suggestion-icon {
+    font-size: 20px;
+    margin-bottom: 8px;
+}
+
+.sf-suggestion-text {
+    font-size: 13px;
+    color: var(--sf-text-primary);
+    font-weight: 500;
+}
+
+/* ========================================
+   Responsive Design
+   ======================================== */
+@media (max-width: 768px) {
+    .sf-message {
+        max-width: 95%;
+    }
+
+    .sf-suggestions {
+        grid-template-columns: 1fr;
+    }
+
+    .sf-header {
+        padding: 12px 16px;
+    }
+
+    .sf-messages-container {
+        padding: 16px;
+    }
+
+    .sf-input-container {
+        padding: 12px 16px;
+    }
+}
+
+/* ========================================
+   Dark Mode Toggle Button
+   ======================================== */
+.sf-theme-toggle {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 8px 16px;
+    color: white;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sf-theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* ========================================
+   Status Badge
+   ======================================== */
+.sf-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.sf-status-success {
+    background: rgba(0, 166, 126, 0.1);
+    color: var(--sf-success);
+}
+
+.sf-status-warning {
+    background: rgba(245, 166, 35, 0.1);
+    color: var(--sf-warning);
+}
+
+.sf-status-error {
+    background: rgba(229, 72, 77, 0.1);
+    color: var(--sf-error);
+}
+
+/* ========================================
+   Citations
+   ======================================== */
+.sf-citation {
+    display: inline-flex;
+    align-items: center;
+    background: var(--sf-primary-light);
+    color: var(--sf-primary-dark);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    margin: 0 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sf-citation:hover {
+    background: var(--sf-primary);
+    color: white;
+}
+
+/* ========================================
+   Markdown Content Styling
+   ======================================== */
+.sf-markdown h1, .sf-markdown h2, .sf-markdown h3 {
+    color: var(--sf-text-primary);
+    margin-top: 16px;
+    margin-bottom: 8px;
+}
+
+.sf-markdown p {
+    margin-bottom: 12px;
+    line-height: 1.6;
+}
+
+.sf-markdown ul, .sf-markdown ol {
+    margin-left: 20px;
+    margin-bottom: 12px;
+}
+
+.sf-markdown li {
+    margin-bottom: 4px;
+}
+
+.sf-markdown code {
+    background: var(--sf-background);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+}
+
+.sf-markdown a {
+    color: var(--sf-primary);
+    text-decoration: none;
+}
+
+.sf-markdown a:hover {
+    text-decoration: underline;
+}
+
+/* Hide streamlit chat elements to use custom */
+[data-testid="stChatInput"] {
+    display: none !important;
+}
