@@ -13,6 +13,11 @@ from .vector_search import (
     RAGTool,
     get_vector_search
 )
+from .platform_tools import (
+    PlatformTool,
+    PlatformToolManager,
+    get_platform_tools
+)
 
 __all__ = [
     "SnowflakeConnector",
@@ -24,5 +29,8 @@ __all__ = [
     "VectorSearchManager",
     "DocumentIngestion",
     "RAGTool",
-    "get_vector_search"
+    "get_vector_search",
+    "PlatformTool",
+    "PlatformToolManager",
+    "get_platform_tools"
 ]
