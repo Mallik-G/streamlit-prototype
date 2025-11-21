@@ -15,6 +15,7 @@ from ui import (
 )
 from chat import ChatEngine, Message
 from utils.data_connectors import get_connector
+from agent_builder import AgentBuilder, AgentExecutor
 
 # Page configuration
 st.set_page_config(
@@ -39,6 +40,12 @@ def init_session_state():
         st.session_state.db_connector = None
     if "show_sql_panel" not in st.session_state:
         st.session_state.show_sql_panel = False
+    if "builder" not in st.session_state:
+        st.session_state.builder = AgentBuilder()
+    if "selected_agent_id" not in st.session_state:
+        st.session_state.selected_agent_id = None
+    if "agent_executor" not in st.session_state:
+        st.session_state.agent_executor = None
 
 init_session_state()
 
@@ -79,66 +86,122 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    # Model Settings Section
-    render_sidebar_section("MODEL CONFIGURATION")
+    # Agent Selector Section
+    render_sidebar_section("ACTIVE AGENT")
 
-    provider = st.selectbox(
-        "Provider",
-        options=["openai", "anthropic"],
-        index=0,
-        help="Select the AI provider"
-    )
+    # Check if an agent is selected
+    if st.session_state.selected_agent_id:
+        agent = st.session_state.builder.load_agent(st.session_state.selected_agent_id)
+        if agent:
+            st.markdown(f"""
+            <div class="sf-card" style="background: var(--sf-primary-light); border-color: var(--sf-primary);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="font-size: 32px;">{agent.icon}</div>
+                    <div>
+                        <div style="font-weight: 600; color: var(--sf-primary-dark);">{agent.name}</div>
+                        <div style="font-size: 11px; color: var(--sf-text-muted);">{agent.category}</div>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
-    if provider == "openai":
-        model_options = ["gpt-4", "gpt-4-turbo", "gpt-3.5-turbo"]
+            if st.button("🔄 Switch Agent", use_container_width=True):
+                st.session_state.selected_agent_id = None
+                st.session_state.messages = []
+                st.session_state.agent_executor = None
+                st.rerun()
+        else:
+            st.session_state.selected_agent_id = None
     else:
-        model_options = ["claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"]
+        # Show available agents
+        my_agents = st.session_state.builder.list_agents()
+        if my_agents:
+            agent_options = {f"{a.icon} {a.name}": a.id for a in my_agents}
+            selected = st.selectbox(
+                "Select an agent to chat with",
+                options=["Default Assistant"] + list(agent_options.keys()),
+                label_visibility="collapsed"
+            )
 
-    model = st.selectbox(
-        "Model",
-        options=model_options,
-        index=0,
-        help="Select the AI model"
-    )
-
-    temperature = st.slider(
-        "Temperature",
-        min_value=0.0,
-        max_value=1.0,
-        value=0.7,
-        step=0.1,
-        help="Controls randomness in responses"
-    )
+            if selected != "Default Assistant" and st.button("Load Agent", use_container_width=True):
+                st.session_state.selected_agent_id = agent_options[selected]
+                st.session_state.messages = []
+                st.rerun()
+        else:
+            st.info("No custom agents yet. Create one in Agent Builder!")
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Memory Settings
-    render_sidebar_section("CONVERSATION")
+    # Model Settings Section (only show if no agent selected)
+    if not st.session_state.selected_agent_id:
+        render_sidebar_section("MODEL CONFIGURATION")
 
-    enable_memory = st.toggle(
-        "Enable Memory",
-        value=True,
-        help="Remember conversation context"
-    )
+        provider = st.selectbox(
+            "Provider",
+            options=["openai", "anthropic"],
+            index=0,
+            help="Select the AI provider"
+        )
 
+        if provider == "openai":
+            model_options = ["gpt-4", "gpt-4-turbo", "gpt-3.5-turbo"]
+        else:
+            model_options = ["claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"]
+
+        model = st.selectbox(
+            "Model",
+            options=model_options,
+            index=0,
+            help="Select the AI model"
+        )
+
+        temperature = st.slider(
+            "Temperature",
+            min_value=0.0,
+            max_value=1.0,
+            value=0.7,
+            step=0.1,
+            help="Controls randomness in responses"
+        )
+
+        st.markdown("<br>", unsafe_allow_html=True)
+
+        # Memory Settings
+        render_sidebar_section("CONVERSATION")
+
+        enable_memory = st.toggle(
+            "Enable Memory",
+            value=True,
+            help="Remember conversation context"
+        )
+
+        # System Prompt
+        render_sidebar_section("SYSTEM PROMPT")
+
+        system_prompt = st.text_area(
+            "System Prompt",
+            value="""You are Cortex AI, an intelligent assistant specialized in data analysis and SQL queries.
+Help users explore data, write optimized queries, and understand complex datasets.""",
+            height=120,
+            label_visibility="collapsed"
+        )
+    else:
+        # Agent is selected - use agent's configuration
+        agent = st.session_state.builder.load_agent(st.session_state.selected_agent_id)
+        provider = agent.model_provider
+        model = agent.model_name
+        temperature = agent.temperature
+        enable_memory = agent.enable_memory
+        system_prompt = agent.system_prompt
+
+    # Clear History button (always visible)
     if st.button("Clear History", use_container_width=True):
         st.session_state.messages = []
         if st.session_state.chat_engine:
             st.session_state.chat_engine.clear_history()
+        if st.session_state.agent_executor:
+            st.session_state.agent_executor.clear_history()
         st.rerun()
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    # System Prompt
-    render_sidebar_section("SYSTEM PROMPT")
-
-    system_prompt = st.text_area(
-        "System Prompt",
-        value="""You are Cortex AI, an intelligent assistant specialized in data analysis and SQL queries.
-Help users explore data, write optimized queries, and understand complex datasets.""",
-        height=120,
-        label_visibility="collapsed"
-    )
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -231,18 +294,38 @@ with main_col:
             response_placeholder = st.empty()
             full_response = ""
 
-            # Stream response
-            for chunk in st.session_state.chat_engine.generate_response(user_input):
-                full_response += chunk
-                # Update placeholder with partial response
-                response_placeholder.markdown(f"""
-                <div class="sf-message sf-message-assistant">
-                    <div class="sf-message-avatar">AI</div>
-                    <div class="sf-message-content">
-                        <div class="sf-message-text">{full_response}▌</div>
+            # Use agent executor if agent is selected, otherwise use chat engine
+            if st.session_state.selected_agent_id:
+                # Initialize agent executor if needed
+                if st.session_state.agent_executor is None:
+                    agent = st.session_state.builder.load_agent(st.session_state.selected_agent_id)
+                    st.session_state.agent_executor = AgentExecutor(agent)
+
+                # Stream response from agent
+                for chunk in st.session_state.agent_executor.execute(user_input):
+                    full_response += chunk
+                    # Update placeholder with partial response
+                    response_placeholder.markdown(f"""
+                    <div class="sf-message sf-message-assistant">
+                        <div class="sf-message-avatar">AI</div>
+                        <div class="sf-message-content">
+                            <div class="sf-message-text">{full_response}▌</div>
+                        </div>
                     </div>
-                </div>
-                """, unsafe_allow_html=True)
+                    """, unsafe_allow_html=True)
+            else:
+                # Stream response from default chat engine
+                for chunk in st.session_state.chat_engine.generate_response(user_input):
+                    full_response += chunk
+                    # Update placeholder with partial response
+                    response_placeholder.markdown(f"""
+                    <div class="sf-message sf-message-assistant">
+                        <div class="sf-message-avatar">AI</div>
+                        <div class="sf-message-content">
+                            <div class="sf-message-text">{full_response}▌</div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
 
             # Clear placeholder and add final message to history
             response_placeholder.empty()

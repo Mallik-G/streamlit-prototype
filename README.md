@@ -9,20 +9,30 @@ A Snowflake-style AI chatbot built with Streamlit, LangChain, and custom enterpr
 - **Streaming Responses**: Real-time streaming with markdown and code block support
 - **SQL Explorer**: Built-in SQL panel with query execution
 - **Data Connectors**: Ready-to-use Snowflake and Databricks integrations
+- **Agent Builder**: Self-serve platform for creating, deploying, and sharing custom AI agents (inspired by [Databricks Labs Kasal](https://github.com/databrickslabs/kasal))
+- **Agent Marketplace**: Discover and deploy pre-built agents from the community
+- **Agent Templates**: 9 pre-configured agents for common use cases
 
 ## Project Structure
 
 ```
 streamlit-prototype/
-├── app.py                    # Main Streamlit application
-├── ui.py                     # UI components and rendering
-├── chat.py                   # LangChain chat engine
-├── styles.css                # Custom CSS theme
-├── requirements.txt          # Python dependencies
-├── components/               # Custom Streamlit components
-├── utils/                    # Utility modules
-│   └── data_connectors.py    # Snowflake/Databricks connectors
-└── assets/                   # Static assets
+├── app.py                          # Main Streamlit application
+├── ui.py                           # UI components and rendering
+├── chat.py                         # LangChain chat engine
+├── styles.css                      # Custom CSS theme
+├── agent_builder.py                # Agent creation and management
+├── agent_templates.py              # Pre-built agent templates
+├── requirements.txt                # Python dependencies
+├── AGENT_BUILDER_GUIDE.md          # Agent builder documentation
+├── pages/                          # Streamlit pages
+│   ├── 1_🔧_Agent_Builder.py      # Agent builder UI
+│   └── 2_🏪_Agent_Marketplace.py  # Agent marketplace UI
+├── components/                     # Custom Streamlit components
+├── utils/                          # Utility modules
+│   └── data_connectors.py          # Snowflake/Databricks connectors
+├── agents/                         # Agent storage (created at runtime)
+└── assets/                         # Static assets
 ```
 
 ## Installation
@@ -63,6 +73,36 @@ streamlit run app.py
 ```
 
 The app will be available at `http://localhost:8501`
+
+## Agent Builder
+
+Create and deploy custom AI agents without code:
+
+### Quick Start
+
+1. **Navigate to Agent Builder** (🔧 icon in sidebar)
+2. **Choose a template** or create from scratch
+3. **Configure**:
+   - Name and description
+   - Model and temperature
+   - System prompt
+   - Tools and capabilities
+4. **Create & Test** your agent
+5. **Publish** to marketplace (optional)
+
+### Pre-built Templates
+
+- 📊 Data Analyst - Statistical analysis and insights
+- 💾 SQL Expert - Query optimization specialist
+- 💬 Customer Support - Friendly support agent
+- ✍️ Content Writer - Marketing and creative content
+- 🐍 Python Developer - Code development assistant
+- 🔬 Research Assistant - Comprehensive researcher
+- 📈 BI Analyst - Business intelligence expert
+- 🧱 Databricks Expert - Spark and Delta Lake specialist
+- ❄️ Snowflake Expert - Data warehouse optimization
+
+See [AGENT_BUILDER_GUIDE.md](AGENT_BUILDER_GUIDE.md) for complete documentation.
 
 ## UI Customization
 
