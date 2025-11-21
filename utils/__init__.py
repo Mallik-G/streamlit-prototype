@@ -18,6 +18,12 @@ from .platform_tools import (
     PlatformToolManager,
     get_platform_tools
 )
+from .domain_discovery import (
+    DomainResource,
+    DomainProfile,
+    DomainDiscoveryEngine,
+    discover_and_create_agent
+)
 
 __all__ = [
     "SnowflakeConnector",
@@ -32,5 +38,9 @@ __all__ = [
     "get_vector_search",
     "PlatformTool",
     "PlatformToolManager",
-    "get_platform_tools"
+    "get_platform_tools",
+    "DomainResource",
+    "DomainProfile",
+    "DomainDiscoveryEngine",
+    "discover_and_create_agent"
 ]

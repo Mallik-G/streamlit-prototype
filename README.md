@@ -37,6 +37,14 @@ A modern AI chatbot platform with Snowflake/Databricks integration, built with S
 - **Mermaid Visualization**: Auto-generated workflow diagrams
 - **Workflow Templates**: Pre-built pipelines for common use cases
 
+### Domain Discovery (Intelligent Onboarding)
+- **Auto-Discovery**: Say "I want to be a Finance Analyst" - automatically discover all finance tables/metrics
+- **Catalog Tag-Based**: Reads domain tags from Unity Catalog/Snowflake metadata
+- **Zero-Config Agents**: Agents auto-configured with domain-specific resources
+- **Always Up-to-Date**: Reflects latest catalog changes automatically
+- **Business Unit Filtering**: Filter resources by business unit tags
+- **Sample Query Generation**: Auto-generates example queries for discovered tables
+
 ## Project Structure
 
 ```
@@ -56,13 +64,16 @@ streamlit-prototype/
 │   ├── 2_🏪_Agent_Marketplace.py  # Agent marketplace UI
 │   ├── 3_📚_Knowledge_Base.py     # Document upload & vector search
 │   ├── 4_🔧_Platform_Tools.py     # UC Functions / Snowflake UDFs registry
-│   └── 5_📊_Workflow_Builder.py   # Workflow builder UI
+│   ├── 5_📊_Workflow_Builder.py   # Workflow builder UI
+│   └── 6_🎯_Domain_Setup.py       # Domain-based intelligent setup
 ├── components/                     # Custom Streamlit components
 ├── utils/                          # Utility modules
 │   ├── __init__.py                 # Package initialization
 │   ├── data_connectors.py          # Snowflake/Databricks connectors
 │   ├── vector_search.py            # Multi-platform vector search
-│   └── platform_tools.py           # Platform-native tool discovery
+│   ├── platform_tools.py           # Platform-native tool discovery
+│   ├── domain_discovery.py         # Intelligent domain discovery engine
+│   └── logging_config.py           # Comprehensive logging utilities
 ├── agents/                         # Agent storage (JSON, created at runtime)
 ├── workflows/                      # Workflow storage (YAML, created at runtime)
 ├── vector_stores/                  # Vector search indexes (created at runtime)
@@ -221,6 +232,69 @@ Create multi-agent workflows for complex tasks:
 - 🔬 Research & Analysis Pipeline (Research → Analyze → Report)
 - 📊 Data Analysis Pipeline (Extract → Analyze → Visualize → Report)
 - ✍️ Content Creation Workflow (Research → Draft → Review → Publish)
+
+### 5. Domain Discovery (Intelligent Onboarding)
+
+Zero-configuration agent setup based on catalog metadata:
+
+**Step 1: Tag Your Tables** (One-time setup)
+
+Databricks (Unity Catalog):
+```sql
+-- Tag tables with domain
+ALTER TABLE finance.revenue_transactions
+SET TAGS ('domain' = 'finance', 'business_unit' = 'finance_bu');
+
+ALTER TABLE finance.budget_forecasts
+SET TAGS ('domain' = 'finance', 'business_unit' = 'finance_bu');
+```
+
+Snowflake:
+```sql
+-- Create domain tag
+CREATE TAG domain;
+
+-- Tag tables
+ALTER TABLE revenue_transactions SET TAG domain = 'finance';
+ALTER TABLE budget_forecasts SET TAG domain = 'finance';
+```
+
+**Step 2: Discover & Create Agent**
+
+1. **Navigate to Domain Setup** (🎯 Domain Setup page)
+2. **Select Domain**: Choose from discovered domains (finance, marketing, sales, etc.)
+3. **Optional**: Filter by Business Unit
+4. **Discover Resources**:
+   - Engine queries catalog for tagged tables
+   - Finds metrics from semantic layer
+   - Discovers approved UC Functions/UDFs
+5. **Review Discovered Resources**:
+   - Tables with columns and sample queries
+   - Metrics and their definitions
+   - Available functions
+6. **Create Agent**: One-click agent creation with:
+   - Auto-generated system prompt with table context
+   - Pre-configured tools from discovered functions
+   - Sample queries for each table
+   - Domain-specific knowledge
+
+**Example Use Case:**
+
+User says: *"I want to be a Finance Analyst working in Finance BU"*
+
+System automatically:
+- ✅ Discovers 47 finance tables (revenue, costs, budgets, invoices, etc.)
+- ✅ Finds 12 finance metrics (YoY growth, margin %, burn rate, etc.)
+- ✅ Identifies 8 finance-specific functions (calculate_roi, forecast_revenue, etc.)
+- ✅ Generates system prompt: *"You are a finance analyst with access to..."*
+- ✅ Creates agent ready to use immediately
+
+**Benefits:**
+- **Zero Manual Configuration**: No need to manually list tables
+- **Always Current**: Reflects latest catalog changes
+- **Governed**: Only uses pre-approved, tagged resources
+- **Fast Onboarding**: Minutes instead of hours
+- **Domain Expertise**: Agent knows all relevant resources
 
 ## UI Customization
 
